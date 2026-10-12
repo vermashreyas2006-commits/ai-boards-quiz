@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Boards Quiz | AI-Powered Board Exam Preparation</title>
+  <meta name="description" content="Prepare for CBSE, ICSE, and State Board exams with customized AI-generated multiple-choice questions, detailed explanations, and performance tracking.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Header / Navigation -->
+  <header class="app-header" id="appHeader">
+    <div class="header-container">
+      <div class="brand-group" id="brandLogo">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+            <path d="M2 17l10 5 10-5"></path>
+            <path d="M2 12l10 5 10-5"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">AI Boards Quiz</span>
+          <span class="brand-badge">CBSE • ICSE • State Boards</span>
+        </div>
+      </div>
+
+      <nav class="nav-links">
+        <button class="nav-btn active" id="navCreateBtn" data-target="createView">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          <span>Create Quiz</span>
+        </button>
+        <button class="nav-btn" id="navHistoryBtn" data-target="historyView">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>Quiz History</span>
+          <span class="history-count-badge" id="historyCountBadge">0</span>
+        </button>
+        <button class="nav-btn" id="navGuideBtn" data-target="guideView">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span>Syllabus & Info</span>
+        </button>
+      </nav>
+
+      <div class="header-actions">
+        <!-- API Connection Pill -->
+        <button class="api-status-pill checking" id="apiStatusBtn" title="Click for API Key setup guide">
+          <span class="status-indicator"></span>
+          <span class="status-label" id="apiStatusLabel">Checking API...</span>
+        </button>
+
+        <!-- Theme Toggle -->
+        <button class="icon-btn theme-toggle" id="themeToggleBtn" aria-label="Toggle theme">
+          <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notification Banner (For API setup or errors) -->
+  <aside class="system-banner hidden" id="systemBanner">
+    <div class="banner-content">
+      <div class="banner-icon" id="bannerIcon">⚠️</div>
+      <div class="banner-text" id="bannerText">Gemini API key is not configured in .env.</div>
+      <button class="banner-action-btn" id="bannerActionBtn">Configure Now</button>
+      <button class="banner-close-btn" id="bannerCloseBtn" aria-label="Close banner">✕</button>
+    </div>
+  </aside>
+
+  <!-- Main Container -->
+  <main class="main-container">
+
+    <!-- ========================================================
+         VIEW 1: CREATE QUIZ (HOME / DASHBOARD)
+         ======================================================== -->
+    <section class="view-section active" id="createView">
+      <div class="hero-section">
+        <div class="hero-pill">
+          <span class="sparkle-icon">✨</span> Powered by Google Gemini AI
+        </div>
+        <h1 class="hero-title">Master Your Board Exams with Intelligent MCQs</h1>
+        <p class="hero-subtitle">
+          Generate syllabus-aligned practice quizzes tailored specifically for your class, education board, and topic. Get instant feedback and conceptual explanations.
+        </p>
+      </div>
+
+      <div class="form-container-card">
+        <div class="form-card-header">
+          <h2 class="card-title">Customize Your Quiz</h2>
+          <p class="card-subtitle">Choose your board curriculum specifications below to generate targeted questions.</p>
+        </div>
+
+        <form id="quizForm" class="quiz-creation-form" novalidate>
+
+          <!-- 1. Class Selection -->
+          <div class="form-group">
+            <label class="form-label" for="classLevelSelect">
+              <span class="label-number">1</span>
+              <span>Select Class / Grade</span>
+              <span class="required-asterisk">*</span>
+            </label>
+            <div class="class-selector-grid" id="classSelectorGrid">
+              <button type="button" class="class-chip" data-class="6">Class 6</button>
+              <button type="button" class="class-chip" data-class="7">Class 7</button>
+              <button type="button" class="class-chip" data-class="8">Class 8</button>
+              <button type="button" class="class-chip" data-class="9">Class 9</button>
+              <button type="button" class="class-chip active" data-class="10">Class 10</button>
+              <button type="button" class="class-chip" data-class="11">Class 11</button>
+              <button type="button" class="class-chip" data-class="12">Class 12</button>
+            </div>
+            <input type="hidden" id="classLevelSelect" name="classLevel" value="10">
+          </div>
+
+          <!-- 2. Board Selection -->
+          <div class="form-grid-row">
+            <div class="form-group flex-1">
+              <label class="form-label" for="boardSelect">
+                <span class="label-number">2</span>
+                <span>Education Board</span>
+                <span class="required-asterisk">*</span>
+              </label>
+              <select class="form-select" id="boardSelect" name="board" required>
+                <option value="CBSE" selected>CBSE (Central Board)</option>
+                <option value="ICSE">ICSE / ISC (CISCE)</option>
+                <option value="State Board">State Board</option>
+              </select>
+            </div>
+
+            <!-- State selection (dynamically revealed if State Board is selected) -->
+            <div class="form-group flex-1 hidden" id="stateBoardGroup">
+              <label class="form-label" for="stateSelect">
+                <span class="label-number">2b</span>
+                <span>Select State</span>
+                <span class="required-asterisk">*</span>
+              </label>
+              <select class="form-select" id="stateSelect" name="stateBoard">
+                <option value="" disabled selected>Select Your State Board...</option>
+                <!-- Populated via syllabus.js / API -->
+              </select>
+            </div>
+          </div>
+
+          <!-- 3. Subject Selection -->
+          <div class="form-group">
+            <label class="form-label" for="subjectSelect">
+              <span class="label-number">3</span>
+              <span>Subject</span>
+              <span class="required-asterisk">*</span>
+            </label>
+            <div class="select-with-custom">
+              <select class="form-select" id="subjectSelect" name="subject" required>
+                <!-- Dynamically populated based on Class & Board -->
+              </select>
+              <input type="text" class="form-input custom-input hidden" id="customSubjectInput" placeholder="Or type custom subject name (e.g. Sanskrit, Psychology)" maxlength="80">
+            </div>
+            <div class="form-helper-text">
+              <button type="button" class="toggle-link" id="toggleCustomSubjectBtn">+ Type custom subject</button>
+            </div>
+          </div>
+
+          <!-- 4. Chapter / Topic Selection -->
+          <div class="form-group">
+            <label class="form-label" for="chapterSelect">
+              <span class="label-number">4</span>
+              <span>Chapter or Topic</span>
+              <span class="required-asterisk">*</span>
+            </label>
+            <div class="select-with-custom">
+              <select class="form-select" id="chapterSelect" name="chapter" required>
+                <!-- Dynamically populated based on Class and Subject -->
+              </select>
+              <input type="text" class="form-input custom-input hidden" id="customChapterInput" placeholder="Or type a specific sub-topic (e.g. Snell's Law, Trigonometric Identities)" maxlength="120">
+            </div>
+            <div class="form-helper-text">
+              <button type="button" class="toggle-link" id="toggleCustomChapterBtn">+ Type specific subtopic</button>
+              <span class="syllabus-note">📌 Reference curriculum topics based on standard NCERT/CISCE patterns.</span>
+            </div>
+          </div>
+
+          <!-- 5. Difficulty and Question Count -->
+          <div class="form-grid-row">
+            <!-- Difficulty -->
+            <div class="form-group flex-1">
+              <label class="form-label">
+                <span class="label-number">5</span>
+                <span>Difficulty Level</span>
+                <span class="required-asterisk">*</span>
+              </label>
+              <div class="pill-selector-group" id="difficultyGroup">
+                <label class="pill-radio-label">
+                  <input type="radio" name="difficulty" value="Easy">
+                  <span class="pill-radio easy">Easy</span>
+                </label>
+                <label class="pill-radio-label">
+                  <input type="radio" name="difficulty" value="Medium" checked>
+                  <span class="pill-radio medium">Medium</span>
+                </label>
+                <label class="pill-radio-label">
+                  <input type="radio" name="difficulty" value="Hard">
+                  <span class="pill-radio hard">Hard</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Number of questions -->
+            <div class="form-group flex-1">
+              <label class="form-label">
+                <span class="label-number">6</span>
+                <span>Number of Questions</span>
+                <span class="required-asterisk">*</span>
+              </label>
+              <div class="pill-selector-group" id="countGroup">
+                <label class="pill-radio-label">
+                  <input type="radio" name="count" value="5">
+                  <span class="pill-radio">5 Qs (~5 min)</span>
+                </label>
+                <label class="pill-radio-label">
+                  <input type="radio" name="count" value="10" checked>
+                  <span class="pill-radio">10 Qs (~15 min)</span>
+                </label>
+                <label class="pill-radio-label">
+                  <input type="radio" name="count" value="20">
+                  <span class="pill-radio">20 Qs (~30 min)</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Error Feedback -->
+          <div class="form-error-box hidden" id="formErrorBox">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span id="formErrorMsg">Please check all required fields before generating.</span>
+          </div>
+
+          <!-- Submit Action -->
+          <div class="form-actions">
+            <button type="submit" class="primary-btn submit-btn" id="generateQuizBtn">
+              <span class="btn-icon">⚡</span>
+              <span class="btn-text">Generate AI Quiz</span>
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- Quick Feature Cards -->
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon indigo">🎯</div>
+          <h3 class="feature-title">Authentic Board Structure</h3>
+          <p class="feature-desc">Questions modeled after standard CBSE, ICSE, and State Board testing criteria with 4 distinct options and one verified key.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon violet">💡</div>
+          <h3 class="feature-title">Conceptual Explanations</h3>
+          <p class="feature-desc">Learn while practicing. Every single question comes with a step-by-step conceptual rationale after quiz completion.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon rose">⏱️</div>
+          <h3 class="feature-title">Real Exam Timing</h3>
+          <p class="feature-desc">Timed mock simulations help train your speed, accuracy, and confidence under realistic board exam conditions.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         VIEW 2: LOADING STATE
+         ======================================================== -->
+    <section class="view-section" id="loadingView">
+      <div class="loading-card">
+        <div class="ai-orbit-spinner">
+          <div class="orbit-ring"></div>
+          <div class="orbit-core">✨</div>
+        </div>
+        <h2 class="loading-title" id="loadingTitle">Consulting Gemini AI...</h2>
+        <p class="loading-status" id="loadingStatusText">Analyzing curriculum standards and generating tailored board MCQs...</p>
+        <div class="loading-bar-track">
+          <div class="loading-bar-fill" id="loadingBarFill"></div>
+        </div>
+        <div class="quote-box" id="loadingQuoteBox">
+          <span class="quote-icon">“</span>
+          <span class="quote-text" id="quoteText">Practice makes progression. Focus on understanding the foundational principles.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         VIEW 3: ACTIVE QUIZ VIEW
+         ======================================================== -->
+    <section class="view-section" id="quizView">
+      <!-- Quiz Header & Timer -->
+      <div class="quiz-header-card">
+        <div class="quiz-meta-info">
+          <div class="quiz-badge-row">
+            <span class="meta-badge" id="quizMetaClass">Class 10</span>
+            <span class="meta-badge" id="quizMetaBoard">CBSE</span>
+            <span class="meta-badge" id="quizMetaDifficulty">Medium</span>
+          </div>
+          <h2 class="quiz-subject-topic" id="quizMetaSubjectTopic">Science: Chemical Reactions and Equations</h2>
+        </div>
+
+        <div class="quiz-timer-group">
+          <div class="timer-display" id="timerDisplay">
+            <svg class="timer-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span class="timer-text" id="timerValue">15:00</span>
+          </div>
+          <button class="secondary-btn quit-quiz-btn" id="quitQuizBtn" title="Abandon quiz">Exit Quiz</button>
+        </div>
+      </div>
+
+      <!-- Quiz Progress Bar -->
+      <div class="quiz-progress-wrapper">
+        <div class="progress-info-row">
+          <span class="progress-count" id="progressCountLabel">Question 1 of 10</span>
+          <span class="answered-count-badge" id="answeredCountLabel">0 of 10 Answered</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-bar-fill" id="quizProgressBar"></div>
+        </div>
+      </div>
+
+      <!-- Main Question Card -->
+      <div class="question-card" id="questionCard">
+        <div class="question-header">
+          <div class="question-number-pill" id="questionNumberPill">Question 1</div>
+          <div class="question-topic-pill" id="questionTopicPill">Subtopic</div>
+        </div>
+
+        <div class="question-body">
+          <p class="question-text" id="questionText">Loading question...</p>
+        </div>
+
+        <!-- Options Grid -->
+        <div class="options-grid" id="optionsGrid">
+          <!-- Dynamically filled with 4 option cards -->
+        </div>
+
+        <!-- Question Navigation Controls -->
+        <div class="question-nav-controls">
+          <button class="secondary-btn nav-arrow-btn" id="prevQuestionBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            <span>Previous</span>
+          </button>
+
+          <div class="palette-toggle-wrapper">
+            <button class="secondary-btn palette-toggle-btn" id="togglePaletteBtn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              <span>Question Palette</span>
+            </button>
+          </div>
+
+          <button class="primary-btn nav-arrow-btn" id="nextQuestionBtn">
+            <span>Next</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+
+          <button class="finish-btn hidden" id="submitQuizBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Submit Quiz</span>
+          </button>
+        </div>
+
+        <!-- Collapsible Question Palette -->
+        <div class="palette-drawer" id="paletteDrawer">
+          <div class="palette-title">Jump to Question:</div>
+          <div class="palette-chips-grid" id="paletteChipsGrid">
+            <!-- Populated with question number chips 1..N -->
+          </div>
+          <div class="palette-legend">
+            <span class="legend-item"><span class="legend-dot current"></span> Current</span>
+            <span class="legend-item"><span class="legend-dot answered"></span> Answered</span>
+            <span class="legend-item"><span class="legend-dot unanswered"></span> Unanswered</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         VIEW 4: RESULTS & REVIEW
+         ======================================================== -->
+    <section class="view-section" id="resultsView">
+      <div class="results-hero-card">
+        <div class="score-summary-header">
+          <div class="score-badge-circle" id="scoreCircle">
+            <span class="score-percent" id="scorePercentValue">80%</span>
+            <span class="score-fraction" id="scoreFractionValue">8 / 10</span>
+          </div>
+          <div class="score-verdict-group">
+            <div class="verdict-tag" id="verdictTag">Great Achievement!</div>
+            <h2 class="verdict-heading" id="verdictHeading">Excellent Performance</h2>
+            <p class="verdict-message" id="verdictMessage">You demonstrated solid command over this chapter's key formulas and core board concepts.</p>
+            <div class="quiz-details-chips" id="resultMetaChips">
+              <!-- Class, Board, Subject, Difficulty, Time -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Key Metrics Cards -->
+        <div class="metrics-row">
+          <div class="metric-card">
+            <span class="metric-val text-indigo" id="metricTotal">10</span>
+            <span class="metric-lbl">Total Questions</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-val text-green" id="metricCorrect">8</span>
+            <span class="metric-lbl">Correct</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-val text-red" id="metricIncorrect">1</span>
+            <span class="metric-lbl">Incorrect</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-val text-amber" id="metricUnanswered">1</span>
+            <span class="metric-lbl">Unanswered</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-val text-violet" id="metricTime">4m 12s</span>
+            <span class="metric-lbl">Time Taken</span>
+          </div>
+        </div>
+
+        <!-- Result Action Buttons -->
+        <div class="result-actions">
+          <button class="primary-btn" id="retakeQuizBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+            <span>Retake This Quiz</span>
+          </button>
+          <button class="secondary-btn" id="newQuizBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>Generate New Quiz</span>
+          </button>
+          <button class="secondary-btn" id="saveHistoryBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            <span>View in History</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Question-by-Question Review Section -->
+      <div class="review-section">
+        <div class="review-header">
+          <h3 class="review-title">Detailed Answer Review & Explanations</h3>
+          <div class="review-filters" id="reviewFilters">
+            <button class="filter-chip active" data-filter="all">All (<span id="filterAllCount">0</span>)</button>
+            <button class="filter-chip" data-filter="correct">Correct (<span id="filterCorrectCount">0</span>)</button>
+            <button class="filter-chip" data-filter="incorrect">Incorrect (<span id="filterIncorrectCount">0</span>)</button>
+            <button class="filter-chip" data-filter="unanswered">Unanswered (<span id="filterUnansweredCount">0</span>)</button>
+          </div>
+        </div>
+
+        <div class="review-cards-list" id="reviewCardsList">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         VIEW 5: QUIZ HISTORY
+         ======================================================== -->
+    <section class="view-section" id="historyView">
+      <div class="history-header-card">
+        <div>
+          <h2 class="view-title">Quiz History & Analytics</h2>
+          <p class="view-subtitle">Review your past test attempts, track progress across subjects, and retake previous quizzes.</p>
+        </div>
+        <button class="danger-outline-btn" id="clearAllHistoryBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          <span>Clear History</span>
+        </button>
+      </div>
+
+      <!-- History Table / Cards -->
+      <div class="history-content-area" id="historyContentArea">
+        <!-- Rendered dynamically via history.js -->
+      </div>
+    </section>
+
+    <!-- ========================================================
+         VIEW 6: SYLLABUS & INFO GUIDE
+         ======================================================== -->
+    <section class="view-section" id="guideView">
+      <div class="guide-header-card">
+        <h2 class="view-title">Curriculum Coverage & Board Exam Guide</h2>
+        <p class="view-subtitle">Learn about our question generation framework, pedagogical structure, and best practices for board exam preparation.</p>
+      </div>
+
+      <div class="guide-grid">
+        <div class="guide-card">
+          <div class="guide-card-icon">🏛️</div>
+          <h3>Supported Boards</h3>
+          <ul class="guide-list">
+            <li><strong>CBSE:</strong> Central Board curriculum spanning Classes 6 to 12 based on the latest NCERT learning benchmarks.</li>
+            <li><strong>ICSE & ISC:</strong> CISCE curriculum emphasizing analytical depth, comprehensive science, and applied mathematics.</li>
+            <li><strong>State Boards:</strong> Maharashtra, Karnataka, Tamil Nadu, Uttar Pradesh, West Bengal, Kerala, Andhra Pradesh, Gujarat, and more.</li>
+          </ul>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-card-icon">📐</div>
+          <h3>Question Format & Rigor</h3>
+          <ul class="guide-list">
+            <li><strong>Four Strict Options:</strong> Every generated MCQ is validated on the backend to contain exactly 4 unique options.</li>
+            <li><strong>Single Verified Answer:</strong> One definitively correct answer mapped strictly to board standards.</li>
+            <li><strong>Conceptual Clarity:</strong> Detailed pedagogical explanations included for every question to strengthen concepts.</li>
+          </ul>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-card-icon">⚡</div>
+          <h3>Board Exam Tips</h3>
+          <ul class="guide-list">
+            <li><strong>Time Management:</strong> Practice with 15-minute 10-question blocks to build steady exam pacing.</li>
+            <li><strong>Conceptual Mistakes:</strong> Always review incorrect answers to understand *why* the distractor was wrong.</li>
+            <li><strong>NCERT Foundation:</strong> NCERT and core textbooks form the bedrock of 80%+ of board exam questions.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================
+       MODALS
+       ======================================================== -->
+
+  <!-- 1. Submit Confirmation Modal -->
+  <div class="modal-backdrop hidden" id="submitModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-icon warning">⚠️</div>
+        <h3 class="modal-title">Ready to Submit?</h3>
+      </div>
+      <div class="modal-body">
+        <p id="submitModalText">You have answered 8 of 10 questions.</p>
+        <div class="unanswered-alert hidden" id="unansweredAlert">
+          <strong>Notice:</strong> You still have <span id="unansweredCountSpan">2</span> unanswered question(s). Unanswered questions will receive 0 marks.
+        </div>
+        <p class="modal-sub">Once submitted, your final score and detailed answer explanations will be computed.</p>
+      </div>
+      <div class="modal-actions">
+        <button class="secondary-btn" id="cancelSubmitBtn">Return to Quiz</button>
+        <button class="primary-btn" id="confirmSubmitBtn">Yes, Submit Now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Quit Confirmation Modal -->
+  <div class="modal-backdrop hidden" id="quitModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-icon danger">🚪</div>
+        <h3 class="modal-title">Exit Active Quiz?</h3>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to exit? Your progress on this current quiz will be lost.</p>
+      </div>
+      <div class="modal-actions">
+        <button class="secondary-btn" id="cancelQuitBtn">Keep Practicing</button>
+        <button class="danger-btn" id="confirmQuitBtn">Exit to Home</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Clear History Confirmation Modal -->
+  <div class="modal-backdrop hidden" id="clearHistoryModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-icon danger">🗑️</div>
+        <h3 class="modal-title">Clear Quiz History?</h3>
+      </div>
+      <div class="modal-body">
+        <p>This will permanently delete all saved quiz attempts, scores, and review logs from your browser. This action cannot be undone.</p>
+      </div>
+      <div class="modal-actions">
+        <button class="secondary-btn" id="cancelClearHistoryBtn">Cancel</button>
+        <button class="danger-btn" id="confirmClearHistoryBtn">Clear All History</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. API Key Setup Guide Modal -->
+  <div class="modal-backdrop hidden" id="apiSetupModal">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <div class="modal-icon info">🔑</div>
+        <div>
+          <h3 class="modal-title">Gemini API Key Setup Guide</h3>
+          <p class="modal-subtitle">Configure your free Google Gemini API key to generate live board quizzes.</p>
+        </div>
+        <button class="modal-close-icon" id="closeApiSetupBtn" aria-label="Close setup modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="setup-steps">
+          <div class="setup-step">
+            <span class="step-num">1</span>
+            <div class="step-content">
+              <h4>Get Your Free Gemini API Key</h4>
+              <p>Visit <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Google AI Studio</a> and sign in with your Google account to create a free API key.</p>
+            </div>
+          </div>
+
+          <div class="setup-step">
+            <span class="step-num">2</span>
+            <div class="step-content">
+              <h4>Open the <code>.env</code> File Locally</h4>
+              <p>In this project directory, open the <code>.env</code> file (or copy <code>.env.example</code> to <code>.env</code>):</p>
+              <pre class="code-block"><code>GEMINI_API_KEY=your_gemini_api_key_here</code></pre>
+            </div>
+          </div>
+
+          <div class="setup-step">
+            <span class="step-num">3</span>
+            <div class="step-content">
+              <h4>Restart Server & Verify</h4>
+              <p>Save <code>.env</code> and restart your Node server (<code>npm start</code>). Then click <strong>"Check Connection"</strong> below:</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="api-check-status-box" id="apiCheckStatusBox">
+          <div class="status-indicator" id="modalStatusIndicator"></div>
+          <span id="modalStatusText">Checking connection...</span>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="secondary-btn" id="testApiConnectionBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+          <span>Check Connection</span>
+        </button>
+        <button class="primary-btn" id="finishApiSetupBtn">Got It</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <span class="footer-title">AI Boards Quiz</span>
+        <span class="footer-desc">AI-powered education tool for CBSE, ICSE & State Boards.</span>
+      </div>
+      <div class="footer-links">
+        <span>Curriculum Reference: NCERT & CISCE Standards</span>
+        <span>•</span>
+        <span>Runs locally on Node.js & Express</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
